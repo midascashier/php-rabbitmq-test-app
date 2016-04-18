@@ -108,26 +108,9 @@ else
     $consumer->consume($channel);
   }
   
-  while (true)
+  while (count($channel->callbacks))
   {
-    $read = array($consumer->conn->getSocket());
-    $write = null;
-    $except = null;
-    if (false === ($changeStreamsCount = stream_select($read, $write, $except, 60)))
-    {
-      /* Error */
-    }
-    elseif ($changeStreamsCount > 0)
-    {
-      foreach ($all_channels as $channel)
-      {
-        $channel->wait();
-      }
-      //stream_set_blocking($consumer->conn->getSocket(), 0);
-      //var_dump(stream_get_contents($consumer->channel->getSocket()));
-    }
+    $channel->wait();
   }
-    
-  
 }
 ?>
