@@ -27,7 +27,7 @@ class AMQPStreamConnection extends AbstractConnection
         $user,
         $password,
         $vhost = '/',
-        $insist = false,
+        $insist = true,
         $login_method = 'AMQPLAIN',
         $login_response = null,
         $locale = 'en_US',

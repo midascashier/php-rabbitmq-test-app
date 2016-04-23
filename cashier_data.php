@@ -18,12 +18,14 @@ class cashier
   private function execPost($url, $params)
   {
     $ch = curl_init();
+    echo "CURL - INIT: ".strftime('%F %T')."\n";
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_POST, 1);
     curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     $result = curl_exec($ch);
     curl_close($ch);
+    echo "CURL - RESULT: ".strftime('%F %T')."\n";
     return $result;
   }
 
