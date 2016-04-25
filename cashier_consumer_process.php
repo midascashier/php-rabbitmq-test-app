@@ -1,11 +1,20 @@
 <?php
+/**
+ *
+ * @author jocampo
+ *
+ */
 require_once ("cashier_consumer.php");
 
+/**
+ * this class is to consume messages from process queue, what we do here is just load variables and then
+ * keep listening for messages
+ */
 class cashier_consumer_process extends cashier_consumer
 {
 
-  /*
-   * (non-PHPdoc)
+  /**
+   *
    * @see consumer::init()
    */
   protected function init()
@@ -15,8 +24,5 @@ class cashier_consumer_process extends cashier_consumer
     $this->url = CONSUMER_PROCESS_URL;
   }
 }
-
-$consumer=new cashier_consumer_process();
-$consumer->consume();
 
 ?>

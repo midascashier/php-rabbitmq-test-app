@@ -1,12 +1,28 @@
 <?php
+/**
+ *
+ * @author jocampo
+ *
+ */
 require_once (__DIR__ . '/config.php');
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 
+/**
+ * this is class is where we have the connection to rabbit, also channels creation
+ * and where we have the rabbit initial configuration, we also have method to start default setup of consumers
+ */
 class cashier_admin
 {
 
   protected $conn;
 
+  /**
+   *
+   * here we validate if pcntl_fork exist if exist then do the fork and return 0
+   *
+   * @throws RuntimeException
+   * @return int
+   */
   protected function fork()
   {
     if (!function_exists('pcntl_fork'))
@@ -40,6 +56,9 @@ class cashier_admin
     return $channel;
   }
 
+  /**
+   * create rabbit initial configuration (exhanges, queues and biddings)
+   */
   public function setup()
   {
     $exchange_info = DEFAULT_EXCHANGE;
@@ -50,7 +69,7 @@ class cashier_admin
     $this->connection();
     echo "Getting Channel... \n";
     $channel = $this->get_channel();
-    foreach (DEFAULT_QUEUES as $queue=>$qty)
+    foreach (DEFAULT_QUEUES as $queue => $qty)
     {
       $routing_key = $queue . ".*";
       $channel->exchange_declare($exchange_name, $exchange_type, false, true, false);
@@ -67,11 +86,23 @@ class cashier_admin
     echo "Done.\n";
   }
 
+  /**
+   * this is the pattern used to validate parameters format
+   * 
+   * @return string
+   */
   protected function get_consumer_validation_format()
   {
     return "|([^:]+):([\\d]+)|i";
   }
 
+  /**
+   *
+   * here we validate that the consumer and quantity have right format (consumer:quantity)
+   *
+   * @param string $consumer_info          
+   * @return boolean
+   */
   protected function validate_consumer($consumer_info)
   {
     $isValid = preg_match($this->get_consumer_validation_format(), $consumer_info, $info);
@@ -91,6 +122,14 @@ class cashier_admin
     }
   }
 
+  /**
+   *
+   * start consumers and keeps waiting for new messages, here the process child are created
+   *
+   * @param string $argv          
+   * @throws RuntimeException
+   *
+   */
   public function start($argv)
   {
     if (strtolower($argv[2] != "all"))
@@ -110,13 +149,13 @@ class cashier_admin
     }
     else
     {
-      $argv=array();
-      foreach (DEFAULT_QUEUES as $queue=>$qty)
+      $argv = array();
+      foreach (DEFAULT_QUEUES as $queue => $qty)
       {
-        $argv[]="$queue:$qty";
+        $argv[] = "$queue:$qty";
       }
     }
-
+    
     for ($i = 0; $i < count($argv); $i ++)
     {
       preg_match($this->get_consumer_validation_format(), $argv[$i], $info);
@@ -125,7 +164,7 @@ class cashier_admin
       
       for ($x = 0; $x < $qty; $x ++)
       {
-        $pid = pcntl_fork();
+        $pid = $this->fork();
         if ($pid == 0)
         {
           $class_name = "cashier_consumer_" . $consumer_name;
