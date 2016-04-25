@@ -88,7 +88,7 @@ class cashier_admin
 
   /**
    * this is the pattern used to validate parameters format
-   * 
+   *
    * @return string
    */
   protected function get_consumer_validation_format()
@@ -172,9 +172,12 @@ class cashier_admin
           if (file_exists($class_file))
           {
             require_once ($class_file);
-            $worker = new $class_name();
-            $worker instanceof cashier_consumer;
-            $worker->consume();
+            if (class_exists($class_name))
+            {
+              $worker = new $class_name();
+              $worker instanceof cashier_consumer;
+              $worker->consume();
+            }
           }
           else
           {

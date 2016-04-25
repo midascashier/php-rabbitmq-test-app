@@ -44,13 +44,13 @@ abstract class cashier_consumer
   public function __construct()
   {
     $this->init();
-    $this->connection();
+    $this->connect();
   }
 
   /**
    * start rabbit connection
    */
-  private function connection()
+  private function connect()
   {
     $this->conn = new AMQPStreamConnection(HOST, PORT, USER, PASS, VHOST);
   }
