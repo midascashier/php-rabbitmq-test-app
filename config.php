@@ -15,7 +15,7 @@ define('CONSUMER_PROCESS_QTY', 4);
 
 // general setup const
 // define('DEFAULT_QUEUES', array('process'=>1, 'transaction'=>1, 'customer'=>1, 'bonus'=>1));
-define('DEFAULT_QUEUES', array('process' => 1));
-define('DEFAULT_EXCHANGE', array('name' => 'work_request', 'type' => 'topic'));
+define('DEFAULT_QUEUES', serialize(array('process' => 1)));
+define('DEFAULT_EXCHANGE', serialize(array('name' => 'work_request', 'type' => 'topic')));
 
 ?>

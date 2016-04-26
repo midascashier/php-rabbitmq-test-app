@@ -27,6 +27,7 @@ class cashier_admin
   {
     if (!function_exists('pcntl_fork'))
     {
+      echo "WARNING: pcntl does not exist.\n";
       return -1;
     }
     $pid = pcntl_fork();
@@ -61,7 +62,7 @@ class cashier_admin
    */
   public function setup()
   {
-    $exchange_info = DEFAULT_EXCHANGE;
+    $exchange_info = unserialize(DEFAULT_EXCHANGE);
     $exchange_name = $exchange_info["name"];
     $exchange_type = $exchange_info["type"];
     
@@ -69,7 +70,7 @@ class cashier_admin
     $this->connection();
     echo "Getting Channel... \n";
     $channel = $this->get_channel();
-    foreach (DEFAULT_QUEUES as $queue => $qty)
+    foreach (unserialize(DEFAULT_QUEUES) as $queue => $qty)
     {
       $routing_key = $queue . ".*";
       $channel->exchange_declare($exchange_name, $exchange_type, false, true, false);
@@ -111,7 +112,7 @@ class cashier_admin
       echo "Error: Bad parameters format\n";
       return false;
     }
-    elseif (!array_key_exists($info[1], DEFAULT_QUEUES))
+    elseif (!array_key_exists($info[1], unserialize(DEFAULT_QUEUES)))
     {
       echo "No Action Allowed\n";
       return false;
@@ -150,7 +151,7 @@ class cashier_admin
     else
     {
       $argv = array();
-      foreach (DEFAULT_QUEUES as $queue => $qty)
+      foreach (unserialize(DEFAULT_QUEUES) as $queue => $qty)
       {
         $argv[] = "$queue:$qty";
       }
@@ -165,7 +166,7 @@ class cashier_admin
       for ($x = 0; $x < $qty; $x ++)
       {
         $pid = $this->fork();
-        if ($pid == 0)
+        if ($pid == 0 || $pid == -1)
         {
           $class_name = "cashier_consumer_" . $consumer_name;
           $class_file = "$class_name.php";
