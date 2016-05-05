@@ -98,6 +98,7 @@ abstract class cashier_consumer
       $response = $this->execPost($msg->body);
       if ($response)
       {
+        echo $response;
         $correlation_id = $msg->get('application_headers')->getNativeData();
         $correlation_id = $correlation_id['correlation_id'];
         $reply_queue = $msg->get('reply_to');
@@ -110,7 +111,7 @@ abstract class cashier_consumer
       }
       else
       {
-        $message->delivery_info['channel']->basic_nack($message->delivery_info['delivery_tag']);
+        $msg->delivery_info['channel']->basic_nack($msg->delivery_info['delivery_tag']);
       }
     }
   }
