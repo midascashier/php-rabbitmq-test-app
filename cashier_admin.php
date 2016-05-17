@@ -4,7 +4,7 @@
  * @author jocampo
  *
  */
-require_once (__DIR__ . '/config.php');
+require_once(__DIR__ . '/config.php');
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 
 /**
@@ -14,6 +14,9 @@ use PhpAmqpLib\Connection\AMQPStreamConnection;
 class cashier_admin
 {
 
+  /**
+   * @var AMQPStreamConnection
+   */
   protected $conn;
 
   /**
@@ -58,14 +61,14 @@ class cashier_admin
   }
 
   /**
-   * create rabbit initial configuration (exhanges, queues and biddings)
+   * create rabbit initial configuration (exchanges, queues and bindings)
    */
   public function setup()
   {
     $exchange_info = unserialize(DEFAULT_EXCHANGE);
     $exchange_name = $exchange_info["name"];
     $exchange_type = $exchange_info["type"];
-    
+
     echo "Starting Connection... \n";
     $this->connection();
     echo "Getting Channel... \n";
@@ -101,7 +104,7 @@ class cashier_admin
    *
    * here we validate that the consumer and quantity have right format (consumer:quantity)
    *
-   * @param string $consumer_info          
+   * @param string $consumer_info
    * @return boolean
    */
   protected function validate_consumer($consumer_info)
@@ -124,12 +127,10 @@ class cashier_admin
   }
 
   /**
-   *
    * start consumers and keeps waiting for new messages, here the process child are created
    *
-   * @param string $argv          
+   * @param string $argv
    * @throws RuntimeException
-   *
    */
   public function start($argv)
   {
@@ -138,11 +139,11 @@ class cashier_admin
       unset($argv[0]);
       unset($argv[1]);
       $argv = array_values($argv);
-      for ($i = 0; $i < count($argv); $i ++)
+      for ($i = 0; $i < count($argv); $i++)
       {
         $isValid = $this->validate_consumer($argv[$i]);
       }
-      
+
       if (!$isValid)
       {
         return false;
@@ -156,14 +157,14 @@ class cashier_admin
         $argv[] = "$queue:$qty";
       }
     }
-    
-    for ($i = 0; $i < count($argv); $i ++)
+
+    for ($i = 0; $i < count($argv); $i++)
     {
       preg_match($this->get_consumer_validation_format(), $argv[$i], $info);
       $qty = $info[2];
       $consumer_name = $info[1];
-      
-      for ($x = 0; $x < $qty; $x ++)
+
+      for ($x = 0; $x < $qty; $x++)
       {
         $pid = $this->fork();
         if ($pid == 0 || $pid == -1)
@@ -172,10 +173,11 @@ class cashier_admin
           $class_file = "$class_name.php";
           if (file_exists($class_file))
           {
-            require_once ($class_file);
+            require_once($class_file);
             if (class_exists($class_name))
             {
               $worker = new $class_name();
+
               $worker instanceof cashier_consumer;
               $worker->consume();
             }
