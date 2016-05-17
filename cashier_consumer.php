@@ -4,7 +4,7 @@
  * @author jocampo
  *
  */
-require_once (__DIR__ . '/config.php');
+require_once(__DIR__ . '/config.php');
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 
 /**
@@ -70,7 +70,7 @@ abstract class cashier_consumer
   /**
    * this simulate cashier connection
    *
-   * @param unknown $params          
+   * @param $params
    * @return mixed
    */
   private function execPost($params)
@@ -89,7 +89,7 @@ abstract class cashier_consumer
   /**
    * here we process the message read it from queue
    *
-   * @param AMQPMessage $msg          
+   * @param $msg \PhpAmqpLib\Message\AMQPMessage
    */
   public function process_message($msg)
   {
@@ -110,7 +110,7 @@ abstract class cashier_consumer
       }
       else
       {
-        $message->delivery_info['channel']->basic_nack($message->delivery_info['delivery_tag']);
+        $msg->delivery_info['channel']->basic_nack($msg->delivery_info['delivery_tag']);
       }
     }
   }
@@ -125,7 +125,7 @@ abstract class cashier_consumer
       $this,
       'process_message'
     ));
-    
+
     while (count($channel->callbacks))
     {
       $channel->wait();
