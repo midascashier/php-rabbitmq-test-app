@@ -8,14 +8,14 @@ define('PASS', 'midas');
 define('VHOST', 'vh');
 
 // process worker configuration
-define('CONSUMER_PROCESS_QUEUE', 'process');
-define('CONSUMER_PROCESS_URL', 'http://cashier.backend.localhost:8080/ws/test.php');
-define('CONSUMER_PROCESS_QOS', 2);
-define('CONSUMER_PROCESS_QTY', 4);
+define('CONSUMER_QUEUE', 'customer');
+define('CONSUMER_URL', 'http://cashier.localhost:8080/wscashier/wsController.php');
+define('CONSUMER_QOS', 2);
+define('CONSUMER_QTY', 4);
 
 // general setup const
 // define('DEFAULT_QUEUES', array('process'=>1, 'transaction'=>1, 'customer'=>1, 'bonus'=>1));
-define('DEFAULT_QUEUES', serialize(array('process' => 1)));
+define('DEFAULT_QUEUES', serialize(array('customer' => 1)));
 define('DEFAULT_EXCHANGE', serialize(array('name' => 'work_request', 'type' => 'topic')));
 
 ?>

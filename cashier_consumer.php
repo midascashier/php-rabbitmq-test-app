@@ -4,7 +4,7 @@
  * @author jocampo
  *
  */
-require_once(__DIR__ . '/config.php');
+require_once (__DIR__ . '/config.php');
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 
 /**
@@ -70,7 +70,8 @@ abstract class cashier_consumer
   /**
    * this simulate cashier connection
    *
-   * @param $params
+   * @param
+   *          $params
    * @return mixed
    */
   private function execPost($params)
@@ -89,7 +90,7 @@ abstract class cashier_consumer
   /**
    * here we process the message read it from queue
    *
-   * @param $msg \PhpAmqpLib\Message\AMQPMessage
+   * @param $msg \PhpAmqpLib\Message\AMQPMessage          
    */
   public function process_message($msg)
   {
@@ -98,8 +99,11 @@ abstract class cashier_consumer
       $response = $this->execPost($msg->body);
       if ($response)
       {
-        $correlation_id = $msg->get('application_headers')->getNativeData();
-        $correlation_id = $correlation_id['correlation_id'];
+        if ($msg->get('application_headers')->getNativeData()['correlation_id'])
+        {
+          $correlation_id = $msg->get('application_headers')->getNativeData();
+          $correlation_id = $correlation_id['correlation_id'];
+        }
         $reply_queue = $msg->get('reply_to');
         $reply_msg = new \PhpAmqpLib\Message\AMQPMessage(json_encode($response), array(
           'content_type' => 'application/json',
@@ -125,7 +129,7 @@ abstract class cashier_consumer
       $this,
       'process_message'
     ));
-
+    
     while (count($channel->callbacks))
     {
       $channel->wait();
