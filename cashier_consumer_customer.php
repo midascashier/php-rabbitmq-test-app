@@ -22,6 +22,7 @@ class cashier_consumer_customer extends cashier_consumer
     $this->queue = CONSUMER_QUEUE;
     $this->qos = CONSUMER_QOS;
     $this->url = CONSUMER_URL;
+    $this->hostname = CONSUMER_HOSTNAME;
   }
 }
 

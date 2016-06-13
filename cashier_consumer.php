@@ -28,6 +28,13 @@ abstract class cashier_consumer
   protected $url = null;
 
   /**
+   * hostname to use in the CURL connection
+   *
+   * @var string
+   */
+  protected $hostname = null;
+
+  /**
    * this specifies the limit of unacknowledged messages on a channel
    *
    * @var int
@@ -76,11 +83,18 @@ abstract class cashier_consumer
    */
   private function execPost($params)
   {
+    $headers = array();
+    if ($this->hostname)
+    {
+      $headers[] = "Host: $this->hostname";
+    }
+
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $this->url);
     curl_setopt($ch, CURLOPT_POST, 1);
     curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
     $result = curl_exec($ch);
     curl_close($ch);
     $result = json_decode($result);
