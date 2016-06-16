@@ -4,7 +4,7 @@
  * @author jocampo
  *
  */
-require_once (__DIR__ . '/config.php');
+require_once(__DIR__ . '/config.php');
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 
 /**
@@ -48,6 +48,9 @@ abstract class cashier_consumer
    */
   protected $conn;
 
+  /**
+   * cashier_consumer constructor.
+   */
   public function __construct()
   {
     $this->init();
@@ -77,8 +80,7 @@ abstract class cashier_consumer
   /**
    * this simulate cashier connection
    *
-   * @param
-   *          $params
+   * @param array $params
    * @return mixed
    */
   private function execPost($params)
@@ -104,7 +106,7 @@ abstract class cashier_consumer
   /**
    * here we process the message read it from queue
    *
-   * @param $msg \PhpAmqpLib\Message\AMQPMessage          
+   * @param $msg \PhpAmqpLib\Message\AMQPMessage
    */
   public function process_message($msg)
   {
@@ -113,16 +115,19 @@ abstract class cashier_consumer
       $response = $this->execPost($msg->body);
       if ($response)
       {
+        $reply_msg_properties = array();
+        $reply_msg_properties['content_type'] = 'application/json';
+
         if ($msg->get('application_headers')->getNativeData()['correlation_id'])
         {
           $correlation_id = $msg->get('application_headers')->getNativeData();
           $correlation_id = $correlation_id['correlation_id'];
+          $reply_msg_properties['correlation_id'] = $correlation_id;
         }
+
         $reply_queue = $msg->get('reply_to');
-        $reply_msg = new \PhpAmqpLib\Message\AMQPMessage(json_encode($response), array(
-          'content_type' => 'application/json',
-          'correlation_id' => $correlation_id
-        ));
+        $reply_msg = new \PhpAmqpLib\Message\AMQPMessage(json_encode($response), $reply_msg_properties);
+
         $msg->delivery_info['channel']->basic_publish($reply_msg, "", $reply_queue);
         $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
       }
@@ -134,7 +139,7 @@ abstract class cashier_consumer
   }
 
   /**
-   * this method ask for channel, start consuming on specified queue and keeps waiting until get nes messages
+   * asks for channel, start consuming on specified queue and keeps waiting until get new messages
    */
   public function consume()
   {
@@ -143,7 +148,7 @@ abstract class cashier_consumer
       $this,
       'process_message'
     ));
-    
+
     while (count($channel->callbacks))
     {
       $channel->wait();
