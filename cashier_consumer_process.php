@@ -20,8 +20,9 @@ class cashier_consumer_process extends cashier_consumer
   protected function init()
   {
     $this->queue = CONSUMER_PROCESS_QUEUE;
-    $this->qos = CONSUMER_PROCESS_QOS;
-    $this->url = CONSUMER_PROCESS_URL;
+    $this->qos = CONSUMER_QOS;
+    $this->url = CONSUMER_URL;
+    $this->hostname = CONSUMER_HOSTNAME;
   }
 }
 
