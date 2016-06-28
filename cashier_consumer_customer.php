@@ -19,7 +19,7 @@ class cashier_consumer_customer extends cashier_consumer
    */
   protected function init()
   {
-    $this->queue = CONSUMER_CONSUMER_QUEUE;
+    $this->queue = CONSUMER_CUSTOMER_QUEUE;
     $this->qos = CONSUMER_QOS;
     $this->url = CONSUMER_URL;
     $this->hostname = CONSUMER_HOSTNAME;
