@@ -90,7 +90,6 @@ abstract class cashier_consumer
     {
       $headers[] = "Host: $this->hostname";
     }
-
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $this->url);
     curl_setopt($ch, CURLOPT_POST, 1);
@@ -104,6 +103,26 @@ abstract class cashier_consumer
   }
 
   /**
+   * set cashier params
+   * 
+   * @param string $params
+   * 
+   * @return string
+   */
+  private function setupRequest($paramsRequest){
+    $params = json_decode($paramsRequest, true);
+    $params['sys_access_pass'] = SYS_ACCESS_PASS;
+    $params['format'] = 'json';
+    
+    // params to debug
+    if(IS_DEV){
+      $params['XDEBUG_SESSION_START'] = 'ECLIPSE_DBGP';
+    }
+    
+    return json_encode($params);
+  }
+  
+  /**
    * here we process the message read it from queue
    *
    * @param $msg \PhpAmqpLib\Message\AMQPMessage
@@ -112,7 +131,8 @@ abstract class cashier_consumer
   {
     if ($msg->body)
     {
-      $response = $this->execPost($msg->body);
+      $request = $this->setupRequest($msg->body);
+      $response = $this->execPost($request);
       if ($response)
       {
         $reply_msg_properties = array();

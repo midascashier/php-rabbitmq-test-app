@@ -40,4 +40,8 @@ define('CONSUMER_BONUS_HOSTNAME', 'cashier.bonus.localhost');
 define('DEFAULT_QUEUES', serialize(array('process'=>1, 'transaction'=>1, 'customer'=>1, 'backend'=>1, 'bonus'=>1)));
 define('DEFAULT_EXCHANGE', serialize(array('name' => 'work_request', 'type' => 'topic')));
 
+// cashier request params
+define('SYS_ACCESS_PASS', 1);
+define('IS_DEV', 1);
+
 ?>
