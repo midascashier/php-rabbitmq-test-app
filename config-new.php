@@ -43,5 +43,5 @@ define('DEFAULT_EXCHANGE', serialize(array('name' => 'work_request', 'type' => '
 // cashier request params
 define('SYS_ACCESS_PASS', 1);
 define('IS_DEV', 1);
-
+define('ONLINE_BE_USER_ID', 10093);
 ?>

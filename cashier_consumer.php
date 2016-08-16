@@ -112,6 +112,7 @@ abstract class cashier_consumer
   private function setupRequest($paramsRequest){
     $params = json_decode($paramsRequest, true);
     $params['sys_access_pass'] = SYS_ACCESS_PASS;
+    $params['userId'] = ONLINE_BE_USER_ID;
     $params['format'] = 'json';
     
     // params to debug
