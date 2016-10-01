@@ -90,6 +90,12 @@ abstract class cashier_consumer
     {
       $headers[] = "Host: $this->hostname";
     }
+
+    // params to debug
+    if(IS_DEV){
+      $this->url=$this->url."?XDEBUG_SESSION_START=ECLIPSE_DBGP";
+    }
+    
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $this->url);
     curl_setopt($ch, CURLOPT_POST, 1);
@@ -116,12 +122,7 @@ abstract class cashier_consumer
     $params['sys_access_pass'] = SYS_ACCESS_PASS;
     $params['userId'] = ONLINE_BE_USER_ID;
     $params['format'] = 'json';
-    
-    // params to debug
-    if(IS_DEV){
-      $params['XDEBUG_SESSION_START'] = 'ECLIPSE_DBGP';
-    }
-    
+
     return json_encode($params);
   }
   
