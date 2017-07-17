@@ -78,6 +78,56 @@ abstract class cashier_consumer
   }
 
   /**
+   * @param $obj
+   * @return string
+   */
+  private function objToStr($obj)
+  {
+    ob_start();
+    print_r($obj);
+    $str = ob_get_contents();
+    ob_end_clean();
+    return $str;
+  }
+
+  /**
+   * log any invalid state
+   *
+   * @param string $sent
+   * @param string $received
+   */
+  private function logOnInvalidState($sent, $received)
+  {
+    if (is_string($sent)){
+      $request = $sent;
+    } else if (is_object($sent)) {
+      $request = $this->objToStr($sent);
+    } else {
+      $request = '*****';
+    }
+
+    if (is_string($received)){
+      $response = $received;
+    } else if (is_object($received)) {
+      $response = $this->objToStr($received);
+    } else {
+      $response = '*****';
+    }
+
+    $check = strpos($response, '"state":"ok"');
+    if ($check === FALSE) {
+      $logFile = "process_error_" . strtoupper('review') . ".txt";
+      $content = date('Y-m-d H:i:s') . ":\n\n";
+      $content .= "request: \n";
+      $content .= $request . " \n";
+      $content .= "response: \n";
+      $content .= $response . " \n";
+      $content .= "\n";
+      @file_put_contents($logFile, $content, FILE_APPEND);
+    }
+  }
+
+  /**
    * this simulate cashier connection
    *
    * @param array $params
@@ -106,8 +156,11 @@ abstract class cashier_consumer
     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
     $result = curl_exec($ch);
     curl_close($ch);
-    $result = json_decode($result);
-    return $result;
+    $json = json_decode($result);
+
+    $this->logOnInvalidState($params, $result);
+
+    return $json;
   }
 
   /**
