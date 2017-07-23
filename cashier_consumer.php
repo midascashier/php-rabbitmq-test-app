@@ -91,12 +91,27 @@ abstract class cashier_consumer
   }
 
   /**
+   * @param $mixed
+   * @return string
+   */
+  private function unknownToStr($mixed)
+  {
+    ob_start();
+    var_dump($mixed);
+    $str = ob_get_contents();
+    ob_end_clean();
+    return $str;
+  }
+
+  /**
    * log any invalid state
    *
+   * @param string $url
    * @param string $sent
    * @param string $received
+   * @param resource $ch
    */
-  private function logOnInvalidState($sent, $received)
+  private function logOnInvalidState($url, $sent, $received, $ch)
   {
     if (is_string($sent)){
       $request = $sent;
@@ -111,17 +126,28 @@ abstract class cashier_consumer
     } else if (is_object($received)) {
       $response = $this->objToStr($received);
     } else {
-      $response = '*****';
+      $response = $this->unknownToStr($received);
     }
 
     $check = strpos($response, '"state":"ok"');
-    if ($check === FALSE) {
+    if ($check === FALSE)
+    {
+      $lastErrorCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+      $lastStats = curl_getinfo($ch);
+      $lastError = curl_error($ch);
+
       $logFile = "process_error_" . strtoupper('review') . ".txt";
       $content = date('Y-m-d H:i:s') . ":\n\n";
+      $content .= "URL: \n";
+      $content .= $url . " \n";
       $content .= "request: \n";
       $content .= $request . " \n";
       $content .= "response: \n";
       $content .= $response . " \n";
+      $content .= "Error information: \n";
+      $content .= $lastErrorCode . ":" . $lastError . " \n";
+      $content .= "Stats: \n";
+      $content .= $this->unknownToStr($lastStats) . " \n";
       $content .= "\n";
       @file_put_contents($logFile, $content, FILE_APPEND);
     }
@@ -158,7 +184,7 @@ abstract class cashier_consumer
     curl_close($ch);
     $json = json_decode($result);
 
-    $this->logOnInvalidState($params, $result);
+    $this->logOnInvalidState($this->url, $params, $result, $ch);
 
     return $json;
   }
@@ -166,7 +192,7 @@ abstract class cashier_consumer
   /**
    * set cashier params
    * 
-   * @param string $params
+   * @param string $paramsRequest
    * 
    * @return string
    */
