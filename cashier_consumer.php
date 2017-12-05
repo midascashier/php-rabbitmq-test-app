@@ -161,10 +161,6 @@ abstract class cashier_consumer
   }
 
   private function logOnTimeOut($startTime, $initialMemory, $response = null){
-    $chanel = $this->get_channel();
-    $queue = $chanel->queue_declare();
-    $numMSG = null;//curl -i -u guest:guest http://localhost:15672/api/queues/;
-
     $msg = $this->msg;
     $timeOut = Util::timeForDisplay(Util::calculateProcessTime($startTime));
     $time = explode(' ', $timeOut);
@@ -178,7 +174,6 @@ abstract class cashier_consumer
       $content .= "Time to execution {$timeOut} \n\n";
       $content .= "Last Memory in use {$initialMemory} \n\n";
       $content .= "Final Memory: {$finalMemory} \n\n";
-      $content .= "Num of messages in queue : {$numMSG} \n\n";
       $content .= "URL {$this->url} \n\n";
       $content .= "Queue {$this->queue} \n\n";
       $content .= "Qos {$this->qos} \n\n";
