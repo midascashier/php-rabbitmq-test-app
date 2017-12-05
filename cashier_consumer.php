@@ -5,6 +5,7 @@
  *
  */
 require_once(__DIR__ . '/config.php');
+require_once (__DIR__ . '/Util.class.php');
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 
 /**
@@ -12,6 +13,12 @@ use PhpAmqpLib\Connection\AMQPStreamConnection;
  */
 abstract class cashier_consumer
 {
+  /**
+   * Use to info in log timeOut
+   *
+   * @var null
+   */
+  private $msg = null;
 
   /**
    * define the queue where the consumer will connect and wait for messages
@@ -153,6 +160,36 @@ abstract class cashier_consumer
     }
   }
 
+  private function logOnTimeOut($startTime, $initialMemory, $response = null){
+    $chanel = $this->get_channel();
+    $queue = $chanel->queue_declare();
+    $numMSG = null;//curl -i -u guest:guest http://localhost:15672/api/queues/;
+
+    $msg = $this->msg;
+    $timeOut = Util::timeForDisplay(Util::calculateProcessTime($startTime));
+    $time = explode(' ', $timeOut);
+    if($time[0] >= '3.00' && $this->queue != 'process'){
+
+      $finalMemory = memory_get_usage();
+      $finalMemory = Util::getMemoryDisplay($finalMemory);
+
+      $logFile = "timeOut-Workers_" . strtoupper('review') . ".txt";
+      $content = date('Y-m-d H:i:s') . ":\n\n";
+      $content .= "Time to execution {$timeOut} \n\n";
+      $content .= "Last Memory in use {$initialMemory} \n\n";
+      $content .= "Final Memory: {$finalMemory} \n\n";
+      $content .= "Num of messages in queue : {$numMSG} \n\n";
+      $content .= "URL {$this->url} \n\n";
+      $content .= "Queue {$this->queue} \n\n";
+      $content .= "Qos {$this->qos} \n\n";
+      $content .= "Message consumer: \n\n";
+      $content .= json_encode($msg, JSON_PRETTY_PRINT) . "\n\n";
+      $content .= "Response: \n\n";
+      $content .= json_encode($response, JSON_PRETTY_PRINT) . "\n\n";
+      @file_put_contents($logFile, $content, FILE_APPEND);
+    }
+  }
+
   /**
    * this simulate cashier connection
    *
@@ -214,10 +251,16 @@ abstract class cashier_consumer
   {
     if ($msg->body)
     {
+      $this->msg = $msg;
+      $memory = memory_get_usage();
+      $memory = Util::getMemoryDisplay($memory);
+      $startTime = Util::getStartTime();
+
       $request = $this->setupRequest($msg->body);
       $response = $this->execPost($request);
       if ($response)
       {
+        $this->logOnTimeOut($startTime, $memory, $response);
         $reply_msg_properties = array();
         $reply_msg_properties['content_type'] = 'application/json';
 
@@ -233,9 +276,7 @@ abstract class cashier_consumer
 
         $msg->delivery_info['channel']->basic_publish($reply_msg, "", $reply_queue);
         $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
-      }
-      else
-      {
+      }else{
         $msg->delivery_info['channel']->basic_nack($msg->delivery_info['delivery_tag']);
       }
     }
